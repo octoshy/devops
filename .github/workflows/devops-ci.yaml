@@ -1,0 +1,35 @@
+# Give Name of Workflow
+name: DevOps CI
+
+# Define the event, branch, and source code on which this workflow should run
+on:
+  push:
+    branches: ["dev-sy-some-work"]
+
+# Define the jobs
+jobs:
+# Job Names can be anything which define the actual purpose of the job preferrably in kebab-case
+  build-test:
+    # Choose the environment to run the Job, can be Windows, Mac, or Linux, Linux is usually chosen as it's cheaper (ubuntu is a type of Linux OS)
+    runs-on: ubuntu-latest
+
+    # Defines the runtime versions to be supported by the application, the job will run for all the versions parallely
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      # This is a pre-existing and most commonly used Github Action, it's sole purpose is to clone your source code in the virtual machine provisioned
+      - uses: actions/checkout@v3
+      # This next workflow is used to setup the Node.JS environment
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      # npm ci is a command to install the production dependencies of a project
+      - run: npm ci
+      # After the dependencies are installed we can test the application's test cases using npm run test
+      - run: npm run test
+      # Finally we build the source code into dist using npm run build
+      - run: npm run build
